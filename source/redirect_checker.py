@@ -15,6 +15,7 @@ logger = logging.getLogger('redirect_checker')
 
 
 def main_loop(config):
+    global run_main_loop
     logger.info(
         u'Run main loop. Worker pool size={}. Sleep time is {}.'.format(
             config.WORKER_POOL_SIZE, config.SLEEP
@@ -43,7 +44,6 @@ def main_loop(config):
 
 def main(argv):
     args = parse_cmd_args(argv[1:])
-
     if args.daemon:
         daemonize()
 
@@ -61,3 +61,5 @@ def main(argv):
 
 if __name__ == '__main__':
     sys.exit(main(sys.argv))
+
+

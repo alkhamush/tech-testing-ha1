@@ -30,6 +30,9 @@ COUNTER_TYPES = (
 )
 
 
+def break_func_for_test():
+    return False
+
 def to_unicode(val, errors='strict'):
     return val if isinstance(val, unicode) else val.decode('utf8', errors=errors)
 
@@ -173,6 +176,9 @@ def get_redirect_history(url, timeout, max_redirects=30, user_agent=None):
             break
 
         if len(history_urls) > max_redirects or (redirect_url in history_urls[:-1]):
+            break
+
+        if break_func_for_test():
             break
 
     counters = get_counters(content) if content else []

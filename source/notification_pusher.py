@@ -83,7 +83,6 @@ def done_with_processed_tasks(task_queue):
                 name=action_name.capitalize(),
                 task_id=task.task_id
             ))
-
             try:
                 getattr(task, action_name)()
             except tarantool.DatabaseError as exc:
@@ -247,6 +246,12 @@ class Config(object):
     pass
 
 
+def my_execfile(filepath):
+    variables = {}
+    execfile(filepath, variables)
+    return variables
+
+
 def load_config_from_pyfile(filepath):
     """
     Создает Config объект из py файла и загружает в него настройки.
@@ -259,11 +264,7 @@ def load_config_from_pyfile(filepath):
     :rtype: Config
     """
     cfg = Config()
-
-    variables = {}
-
-    execfile(filepath, variables)
-
+    variables = my_execfile(filepath)
     for key, value in variables.iteritems():
         if key.isupper():
             setattr(cfg, key, value)
@@ -330,6 +331,10 @@ def main(argv):
         logger.info('Stop application loop in main.')
 
     return exit_code
+
+
+
+
 
 
 if __name__ == '__main__':

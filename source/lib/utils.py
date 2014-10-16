@@ -37,6 +37,12 @@ def create_pidfile(pidfile_path):
         f.write(pid)
 
 
+def my_execfile(filepath):
+    variables = {}
+    execfile(filepath, variables)
+    return variables
+
+
 def load_config_from_pyfile(filepath):
     """
     Создает Config объект из py файла и загружает в него настройки.
@@ -49,11 +55,7 @@ def load_config_from_pyfile(filepath):
     :rtype: Config
     """
     cfg = Config()
-
-    variables = {}
-
-    execfile(filepath, variables)
-
+    variables = my_execfile(filepath)
     for key, value in variables.iteritems():
         if key.isupper():
             setattr(cfg, key, value)

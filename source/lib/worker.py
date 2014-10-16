@@ -10,6 +10,10 @@ from utils import get_tube
 logger = getLogger('redirect_checker')
 
 
+def break_func_for_test():
+    return False
+
+
 def get_redirect_history_from_task(task, timeout, max_redirects=30, user_agent=None):
     url = to_unicode(task.data['url'], 'ignore')
     is_recheck = bool(task.data.get('recheck'))
@@ -95,5 +99,7 @@ def worker(config, parent_pid):
             except DatabaseError as e:
                 logger.info('Task ack fail')
                 logger.exception(e)
+        if break_func_for_test():
+            break
     else:
         logger.info('Parent is dead. exiting')
