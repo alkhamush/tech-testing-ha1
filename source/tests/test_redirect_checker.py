@@ -4,20 +4,20 @@ import redirect_checker
 
 
 class RedirectCheckerTestCase(unittest.TestCase):
-    pass
     def test_main_loop(self):
         test_config = Mock()
         test_config.WORKER_POOL_SIZE = 10
         test_config.SLEEP = 0.01
         test_config.CHECK_URL = 0.01
         test_pid = 42
-        with patch('notification_pusher.logger', Mock()):
+        with patch('redirect_checker.logger', Mock()) as logger:
             with patch('os.getpid', Mock(return_value=test_pid)):
                 with patch('redirect_checker.check_network_status', Mock(return_value=True)):
                     with patch('redirect_checker.active_children', Mock(return_value=list([1, 2, 3]))):
                         with patch('redirect_checker.spawn_workers', Mock()):
-                            with patch('redirect_checker.sleep', Mock(side_effect=Exception())):
+                            with patch('redirect_checker.break_func_for_test', Mock(return_value=True)):
                                 redirect_checker.main_loop(test_config)
+        self.assertTrue(logger.info.called)
 
     def test_main_loop_count_subzero(self):
         test_config = Mock()
@@ -25,13 +25,14 @@ class RedirectCheckerTestCase(unittest.TestCase):
         test_config.SLEEP = 0.01
         test_config.CHECK_URL = 0.01
         test_pid = 42
-        with patch('notification_pusher.logger', Mock()):
+        with patch('redirect_checker.logger', Mock()) as logger:
             with patch('os.getpid', Mock(return_value=test_pid)):
                 with patch('redirect_checker.check_network_status', Mock(return_value=True)):
                     with patch('redirect_checker.active_children', Mock(return_value=list([1, 2, 3]))):
                         with patch('redirect_checker.spawn_workers', Mock()):
-                            with patch('redirect_checker.sleep', Mock(side_effect=Exception())):
+                            with patch('redirect_checker.break_func_for_test', Mock(return_value=True)):
                                 redirect_checker.main_loop(test_config)
+        self.assertTrue(logger.info.called)
 
 
     def test_main_loop_check_network_status_false(self):
@@ -42,12 +43,13 @@ class RedirectCheckerTestCase(unittest.TestCase):
         test_pid = 42
         proc = Mock()
         proc.terminate = Mock()
-        with patch('notification_pusher.logger', Mock()):
+        with patch('redirect_checker.logger', Mock()) as logger:
             with patch('os.getpid', Mock(return_value=test_pid)):
                 with patch('redirect_checker.check_network_status', Mock(return_value=False)):
                     with patch('redirect_checker.active_children', Mock(return_value=list([proc, proc, proc]))):
-                        with patch('redirect_checker.sleep', Mock(side_effect=Exception)):
+                        with patch('redirect_checker.break_func_for_test', Mock(return_value=True)):
                             redirect_checker.main_loop(test_config)
+        self.assertTrue(logger.critical.called)
 
     def test_main_true(self):
         args = Mock()
@@ -93,3 +95,6 @@ class RedirectCheckerTestCase(unittest.TestCase):
                                         self.assertTrue(main_loop.called)
                                         self.assertEqual(config.EXIT_CODE, res)
 
+    def break_func_for_test(self):
+        result = redirect_checker.break_func_for_test()
+        self.assertFalse(result)

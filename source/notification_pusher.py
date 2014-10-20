@@ -32,6 +32,14 @@ exit_code = 0
 logger = logging.getLogger('pusher')
 
 
+def break_func_for_test():
+    return False
+
+
+def while_is_workig():
+    return True
+
+
 def notification_worker(task, task_queue, *args, **kwargs):
     """
     Обработчик задачи отправки уведомления.
@@ -176,6 +184,8 @@ def main_loop(config):
         done_with_processed_tasks(processed_task_queue)
 
         sleep(config.SLEEP)
+        if break_func_for_test():
+            break
     else:
         logger.info('Stop application loop.')
 
@@ -297,6 +307,7 @@ def main(argv):
     :param argv: агрументы командной строки.
     :type argv: list
     """
+    global run_application
     args = parse_cmd_args(argv[1:])
 
     if args.daemon:
@@ -317,7 +328,7 @@ def main(argv):
 
     install_signal_handlers()
 
-    while run_application:
+    while run_application and while_is_workig():
         try:
             main_loop(config)
         except Exception as exc:
@@ -327,6 +338,8 @@ def main(argv):
             logger.exception(exc)
 
             sleep(config.SLEEP_ON_FAIL)
+        if break_func_for_test():
+            break
     else:
         logger.info('Stop application loop in main.')
 

@@ -14,6 +14,10 @@ from lib.worker import worker
 logger = logging.getLogger('redirect_checker')
 
 
+def break_func_for_test():
+    return False
+
+
 def main_loop(config):
     global run_main_loop
     logger.info(
@@ -40,6 +44,8 @@ def main_loop(config):
                 c.terminate()
 
         sleep(config.SLEEP)
+        if break_func_for_test():
+            break
 
 
 def main(argv):

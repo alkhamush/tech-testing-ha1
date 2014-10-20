@@ -33,6 +33,7 @@ COUNTER_TYPES = (
 def break_func_for_test():
     return False
 
+
 def to_unicode(val, errors='strict'):
     return val if isinstance(val, unicode) else val.decode('utf8', errors=errors)
 

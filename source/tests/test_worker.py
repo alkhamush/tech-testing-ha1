@@ -24,7 +24,6 @@ def get_confog():
 
 
 class WorkerTestCase(unittest.TestCase):
-    pass
     def test_get_redirect_history_from_task_error_and_no_recheck1(self):
         task = Mock()
         task.data = dict(url='url', recheck=False, url_id='url_id', suspicious='suspicious')
@@ -66,25 +65,31 @@ class WorkerTestCase(unittest.TestCase):
 
     def test_worker_no_while(self):
         config = get_confog()
-        with patch("os.path.exists", Mock(return_value=False)):
-            worker.worker(config, 42)
+        with patch('lib.worker.logger', Mock()) as logger:
+            with patch("os.path.exists", Mock(return_value=False)):
+                worker.worker(config, 42)
+        self.assertTrue(logger.info.called)
 
     def test_worker_ifresult_false(self):
         config = get_confog()
-        with patch("os.path.exists", Mock(return_value=True)):
-            with patch("lib.worker.break_func_for_test", Mock(return_value=True)):
-                with patch("lib.worker.get_tube", Mock(return_value=MagicMock())):
-                    with patch("lib.worker.get_redirect_history_from_task", Mock(return_value=False)):
-                        worker.worker(config, 42)
+        with patch('lib.worker.logger', Mock()) as logger:
+            with patch("os.path.exists", Mock(return_value=True)):
+                with patch("lib.worker.break_func_for_test", Mock(return_value=True)):
+                    with patch("lib.worker.get_tube", Mock(return_value=MagicMock())):
+                        with patch("lib.worker.get_redirect_history_from_task", Mock(return_value=False)):
+                            worker.worker(config, 42)
+        self.assertTrue(logger.info.called)
 
     def test_worker_no_task(self):
         config = get_confog()
         input_tube = MagicMock()
         input_tube.take = Mock(return_value=False)
-        with patch("os.path.exists", Mock(return_value=True)):
-            with patch("lib.worker.break_func_for_test", Mock(return_value=True)):
-                with patch("lib.worker.get_tube", Mock(return_value=input_tube)):
-                    worker.worker(config, 42)
+        with patch('lib.worker.logger', Mock()) as logger:
+            with patch("os.path.exists", Mock(return_value=True)):
+                with patch("lib.worker.break_func_for_test", Mock(return_value=True)):
+                    with patch("lib.worker.get_tube", Mock(return_value=input_tube)):
+                        worker.worker(config, 42)
+        self.assertTrue(logger.info.called)
 
     def test_worker_exception(self):
         config = get_confog()
@@ -92,12 +97,14 @@ class WorkerTestCase(unittest.TestCase):
         task.ack = Mock(side_effect=DatabaseError)
         input_tube = MagicMock()
         input_tube.take = Mock(return_value=task)
-        with patch("os.path.exists", Mock(return_value=True)):
-            with patch("lib.worker.break_func_for_test", Mock(return_value=True)):
-                with patch("lib.worker.get_tube", Mock(return_value=input_tube)):
-                    data = dict(url='url', recheck=True, url_id='url_id', suspicious='suspicious')
-                    with patch("lib.worker.get_redirect_history_from_task", Mock(return_value=(True, data))):
-                        worker.worker(config, 42)
+        with patch('lib.worker.logger', Mock()) as logger:
+            with patch("os.path.exists", Mock(return_value=True)):
+                with patch("lib.worker.break_func_for_test", Mock(return_value=True)):
+                    with patch("lib.worker.get_tube", Mock(return_value=input_tube)):
+                        data = dict(url='url', recheck=True, url_id='url_id', suspicious='suspicious')
+                        with patch("lib.worker.get_redirect_history_from_task", Mock(return_value=(True, data))):
+                            worker.worker(config, 42)
+        self.assertTrue(logger.info.called)
 
     def break_func_for_test(self):
         result = worker.break_func_for_test()
